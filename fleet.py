@@ -10,20 +10,14 @@ class Fleet:
     def __init__(self) -> None:
         self._vehicles: list[Vehicle] = []
 
-
-"""Создание."""
-
-
+    # Создание
     def add(self, vehicle: Vehicle) -> None:
         """Добавить ТС в автопарк."""
         if self._find_by_plate(vehicle.plate) is not None:
             raise ValueError(f"ТС с номером {vehicle.plate} уже существует")
         self._vehicles.append(vehicle)
 
-
-"""Чтение.""""
-
-
+    # Чтение
     def get_by_plate(self, plate: str) -> Vehicle:
         """Найти ТС по госномеру."""
         vehicle = self._find_by_plate(plate)
@@ -46,11 +40,7 @@ class Fleet:
         """Отфильтровать по марке."""
         return [v for v in self._vehicles if v.brand.lower() == brand.lower()]
 
-
-"""Обновить."""
-
-
-
+    # Обновление
     def update(self, plate: str, **kwargs: object) -> Vehicle:
         """Обновить атрибуты ТС по госномеру."""
         vehicle = self.get_by_plate(plate)
@@ -60,19 +50,13 @@ class Fleet:
             setattr(vehicle, key, value)
         return vehicle
 
-
-"""Удалить."""
-
-
+    # Удаление
     def delete(self, plate: str) -> None:
         """Удалить ТС по госномеру."""
         vehicle = self.get_by_plate(plate)
         self._vehicles.remove(vehicle)
 
-
-"""Магические методы."""
-
-
+    # Магические методы
     def __len__(self) -> int:
         return len(self._vehicles)
 
