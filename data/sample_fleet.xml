@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fleet>
+  <vehicle type="Car">
+    <brand>Toyota</brand>
+    <model>Camry</model>
+    <year>2020</year>
+    <price>2500000.0</price>
+    <plate>A123BC</plate>
+    <engine>
+      <engine_type>Бензин</engine_type>
+      <volume>2.5</volume>
+      <power>181</power>
+    </engine>
+    <owner>
+      <full_name>Иванов И.И.</full_name>
+      <phone>+7-900-000-00-01</phone>
+    </owner>
+    <doors>4</doors>
+    <body_type>Седан</body_type>
+  </vehicle>
+  <vehicle type="Truck">
+    <brand>Volvo</brand>
+    <model>FH</model>
+    <year>2018</year>
+    <price>5800000.0</price>
+    <plate>B456DE</plate>
+    <engine>
+      <engine_type>Дизель</engine_type>
+      <volume>12.8</volume>
+      <power>460</power>
+    </engine>
+    <owner nil="true"/>
+    <capacity_tons>20.0</capacity_tons>
+  </vehicle>
+</fleet>

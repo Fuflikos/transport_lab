@@ -1,0 +1,36 @@
+[
+    {
+        "type": "Car",
+        "brand": "Toyota",
+        "model": "Camry",
+        "year": 2020,
+        "price": 2500000.0,
+        "plate": "A123BC",
+        "engine": {
+            "engine_type": "Бензин",
+            "volume": 2.5,
+            "power": 181
+        },
+        "owner": {
+            "full_name": "Иванов И.И.",
+            "phone": "+7-900-000-00-01"
+        },
+        "doors": 4,
+        "body_type": "Седан"
+    },
+    {
+        "type": "Truck",
+        "brand": "Volvo",
+        "model": "FH",
+        "year": 2018,
+        "price": 5800000.0,
+        "plate": "B456DE",
+        "engine": {
+            "engine_type": "Дизель",
+            "volume": 12.8,
+            "power": 460
+        },
+        "owner": null,
+        "capacity_tons": 20.0
+    }
+]
