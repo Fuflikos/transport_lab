@@ -1,6 +1,7 @@
 """Сохранение и загрузка автопарка в JSON и XML."""
 
 import json
+import os
 import xml.etree.ElementTree as ET
 
 from exceptions import RepositoryError
@@ -16,6 +17,7 @@ class VehicleRepository:
     def save_json(fleet: Fleet, path: str) -> None:
         """Сохранить автопарк в JSON."""
         try:
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
             data = [v.to_dict() for v in fleet.all()]
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
@@ -41,6 +43,7 @@ class VehicleRepository:
     def save_xml(fleet: Fleet, path: str) -> None:
         """Сохранить автопарк в XML."""
         try:
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
             root = ET.Element("fleet")
             for v in fleet.all():
                 data = v.to_dict()
