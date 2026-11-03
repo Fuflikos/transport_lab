@@ -1,4 +1,7 @@
-"""Демонстрация работы с автопарком: ООП, исключения, JSON, XML."""
+"""Точка входа: интерактивное меню управления автопарком."""
+
+import os
+from typing import Any
 
 from exceptions import VehicleError, VehicleNotFoundError
 from fleet import Fleet
@@ -10,79 +13,157 @@ from models.owner import Owner
 from models.truck import Truck
 from repository import VehicleRepository
 
+DB_JSON = "data/database.json"
+DB_XML = "data/database.xml"
 
-def build_demo_fleet() -> Fleet:
-    """Создать демонстрационный автопарк."""
-    fleet = Fleet()
 
-    fleet.add(Car(
-        brand="Toyota", model="Camry", year=2020, price=2_500_000,
-        plate="A123BC", engine=Engine("Бензин", 2.5, 181),
-        doors=4, body_type="Седан",
-        owner=Owner("Иванов И.И.", "+7-900-000-00-01"),
-    ))
-    fleet.add(Truck(
-        brand="Volvo", model="FH", year=2018, price=5_800_000,
-        plate="B456DE", engine=Engine("Дизель", 12.8, 460),
-        capacity_tons=20.0,
-    ))
-    fleet.add(Bus(
-        brand="Mercedes", model="Sprinter", year=2021, price=3_200_000,
-        plate="C789FG", engine=Engine("Дизель", 2.1, 143),
-        seats=20,
-    ))
-    fleet.add(Motorcycle(
-        brand="Yamaha", model="MT-07", year=2022, price=850_000,
-        plate="D012HI", engine=Engine("Бензин", 0.689, 73),
-        moto_type="Спорт",
-    ))
+def input_int(prompt: str) -> int:
+    """Безопасный ввод целого числа."""
+    while True:
+        try:
+            return int(input(prompt))
+        except ValueError:
+            print("Ошибка: введите целое число.")
 
-    return fleet
+
+def input_float(prompt: str) -> float:
+    """Безопасный ввод дробного числа."""
+    while True:
+        try:
+            return float(input(prompt).replace(",", "."))
+        except ValueError:
+            print("Ошибка: введите число.")
+
+
+def create_vehicle_from_input() -> Any:
+    """Диалог создания нового ТС."""
+    print("\nВыберите тип ТС:")
+    print("1. Легковой (Car)")
+    print("2. Грузовой (Truck)")
+    print("3. Автобус (Bus)")
+    print("4. Мотоцикл (Motorcycle)")
+    choice = input("Ваш выбор: ")
+
+    brand = input("Марка: ")
+    model = input("Модель: ")
+    year = input_int("Год выпуска: ")
+    price = input_float("Цена: ")
+    plate = input("Госномер: ")
+
+    print("--- Двигатель ---")
+    engine_type = input("Тип двигателя (Бензин/Дизель/Электро): ")
+    volume = input_float("Объём двигателя: ")
+    power = input_int("Мощность (л.с.): ")
+    engine = Engine(engine_type, volume, power)
+
+    print("--- Владелец (оставьте пустым, если нет) ---")
+    owner_name = input("ФИО владельца: ")
+    owner = None
+    if owner_name:
+        owner_phone = input("Телефон: ")
+        owner = Owner(owner_name, owner_phone)
+
+    if choice == "1":
+        doors = input_int("Количество дверей: ")
+        body_type = input("Тип кузова: ")
+        return Car(brand, model, year, price, plate, engine, doors, body_type, owner)
+    elif choice == "2":
+        capacity = input_float("Грузоподъёмность (т): ")
+        return Truck(brand, model, year, price, plate, engine, capacity, owner)
+    elif choice == "3":
+        seats = input_int("Количество мест: ")
+        return Bus(brand, model, year, price, plate, engine, seats, owner)
+    elif choice == "4":
+        moto_type = input("Тип мотоцикла (Спорт/Круизер): ")
+        return Motorcycle(brand, model, year, price, plate, engine, moto_type, owner)
+    else:
+        raise ValueError("Неверный тип ТС")
 
 
 def main() -> None:
-    try:
-        fleet = build_demo_fleet()
-        print(f"Создан автопарк: {fleet}")
-        print("-" * 60)
-        for v in fleet.all():
-            print(v.get_info())
-
-        # Обновление
-        print("\n UPDATE: смена владельца Toyota Camry")
-        fleet.update("A123BC", owner=Owner("Петров П.П.", "+7-900-000-00-02"))
-        print(fleet.get_by_plate("A123BC").owner)
-
-        # Чтение
-        print("\n READ: поиск по марке Volvo")
-        for v in fleet.filter_by_brand("Volvo"):
-            print(v.get_info())
-
-        # Исключение 
-        print("\n Обработка ошибки")
+    # 1. Инициализация: загрузка или создание базы
+    fleet = Fleet()
+    if os.path.exists(DB_JSON):
         try:
-            fleet.get_by_plate("ZZ999ZZ")
+            fleet = VehicleRepository.load_json(DB_JSON)
+            print(f"База данных загружена: {len(fleet)} ТС")
+        except VehicleError as e:
+            print(f"Не удалось загрузить базу: {e}. Начинаем с пустой.")
+    else:
+        print("Файл базы данных не найден. Создан пустой автопарк.")
+
+    # 2. Главный цикл меню
+    while True:
+        print("\n" + "=" * 40)
+        print("         МЕНЕДЖЕР АВТОПАРКА")
+        print("=" * 40)
+        print("1. Показать все ТС")
+        print("2. Найти ТС по госномеру")
+        print("3. Добавить новое ТС")
+        print("4. Обновить цену ТС")
+        print("5. Удалить ТС")
+        print("6. Сохранить в JSON и XML")
+        print("0. Выход")
+        print("=" * 40)
+
+        choice = input("Выберите пункт меню: ").strip()
+
+        try:
+            if choice == "1":
+                if len(fleet) == 0:
+                    print("Автопарк пуст.")
+                else:
+                    print(f"\nВсего ТС: {len(fleet)}")
+                    for v in fleet.all():
+                        print(f" - {v.get_info()}")
+
+            elif choice == "2":
+                plate = input("Введите госномер: ").strip()
+                v = fleet.get_by_plate(plate)
+                print(f"Найдено: {v.get_info()}")
+                if v.owner:
+                    print(f"Владелец: {v.owner}")
+
+            elif choice == "3":
+                new_v = create_vehicle_from_input()
+                fleet.add(new_v)
+                print("ТС успешно добавлено!")
+
+            elif choice == "4":
+                plate = input("Введите госномер для обновления: ").strip()
+                v = fleet.get_by_plate(plate)  # выбросит исключение, если нет
+                new_price = input_float("Введите новую цену: ")
+                fleet.update(plate, price=new_price)
+                print(f"Цена обновлена. Новая стоимость: {v.price}")
+
+            elif choice == "5":
+                plate = input("Введите госномер для удаления: ").strip()
+                fleet.delete(plate)
+                print("ТС успешно удалено.")
+
+            elif choice == "6":
+                VehicleRepository.save_json(fleet, DB_JSON)
+                VehicleRepository.save_xml(fleet, DB_XML)
+                print(f"Сохранено в {DB_JSON} и {DB_XML}")
+
+            elif choice == "0":
+                print("Сохранение перед выходом...")
+                VehicleRepository.save_json(fleet, DB_JSON)
+                VehicleRepository.save_xml(fleet, DB_XML)
+                print("До свидания!")
+                break
+
+            else:
+                print("Неверный пункт меню. Попробуйте снова.")
+
         except VehicleNotFoundError as e:
-            print(f"Поймано исключение: {e}")
-
-        # JSON
-        VehicleRepository.save_json(fleet, "data/fleet.json")
-        fleet_from_json = VehicleRepository.load_json("data/fleet.json")
-        print(f"\nЗагружено из JSON: {fleet_from_json}")
-
-        # XML
-        VehicleRepository.save_xml(fleet, "data/fleet.xml")
-        fleet_from_xml = VehicleRepository.load_xml("data/fleet.xml")
-        print(f"Загружено из XML: {fleet_from_xml}")
-
-        # DELETE
-        fleet.delete("D012HI")
-        print(f"\nПосле удаления: {fleet}")
-
-    except VehicleError as e:
-        print(f"Ошибка предметной области: {e}")
-    except Exception as e:  # noqa: BLE001
-        print(f"Непредвиденная ошибка: {e}")
+            print(f"ОШИБКА: {e}")
+        except VehicleError as e:
+            print(f"ОШИБКА ПРЕДМЕТНОЙ ОБЛАСТИ: {e}")
+        except ValueError as e:
+            print(f"ОШИБКА ВВОДА: {e}")
+        except Exception as e:
+            print(f"НЕПРЕДВИДЕННАЯ ОШИБКА: {e}")
 
 
 if __name__ == "__main__":

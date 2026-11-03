@@ -10,4 +10,5 @@ env/
 *.json
 !data/sample_*.json
 !data/sample_*.xml
+!data/database.json
 .pytest_cache/
